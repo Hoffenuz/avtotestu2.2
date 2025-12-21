@@ -76,10 +76,12 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
 
         // Transform JSON data to our Question format
         const transformedQuestions: Question[] = variantData.data.map((q, idx) => {
-          const answers = q.answers.answer[questionLang] || q.answers.answer.uz;
+          // questionLang can be 'oz' (Latin), 'uz' (Cyrillic), or 'ru' (Russian)
+          const answerLang = questionLang as keyof typeof q.answers.answer;
+          const answers = q.answers.answer[answerLang] || q.answers.answer.uz;
           return {
             id: idx + 1,
-            text: q.question[questionLang] || q.question.uz,
+            text: (q.question as any)[questionLang] || q.question.uz,
             image: q.photo ? `/images/${q.photo}` : undefined,
             correctAnswer: q.answers.status,
             answers: answers.map((answerText, ansIdx) => ({

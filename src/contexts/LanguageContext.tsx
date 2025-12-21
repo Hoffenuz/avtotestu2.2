@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import uzLatTranslations from '@/locales/uz-lat.json';
 import uzTranslations from '@/locales/uz.json';
 import ruTranslations from '@/locales/ru.json';
 
-type Language = 'uz' | 'ru';
+type Language = 'uz-lat' | 'uz' | 'ru';
 
 interface Translations {
   [key: string]: any;
@@ -12,10 +13,11 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
-  questionLang: 'uz' | 'ru';
+  questionLang: 'oz' | 'uz' | 'ru';
 }
 
 const translations: Record<Language, Translations> = {
+  'uz-lat': uzLatTranslations,
   uz: uzTranslations,
   ru: ruTranslations,
 };
@@ -25,7 +27,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('language');
-    return (saved === 'uz' || saved === 'ru') ? saved : 'uz';
+    return (saved === 'uz-lat' || saved === 'uz' || saved === 'ru') ? saved : 'uz';
   });
 
   useEffect(() => {
@@ -52,8 +54,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return typeof result === 'string' ? result : key;
   };
 
-  // Question language key for JSON data (uz = Uzbek Cyrillic, ru = Russian)
-  const questionLang: 'uz' | 'ru' = language;
+  // Question language key for JSON data
+  // uz-lat (Uzbek Latin) -> 'oz' in JSON
+  // uz (Uzbek Cyrillic) -> 'uz' in JSON
+  // ru (Russian) -> 'ru' in JSON
+  const questionLang: 'oz' | 'uz' | 'ru' = language === 'uz-lat' ? 'oz' : language;
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, questionLang }}>
