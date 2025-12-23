@@ -1,107 +1,151 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase, hashPassword } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import { User, Session } from '@supabase/supabase-js';
 
-interface User {
-  id: number;
-  login: string;
-  fio?: string;
+interface Profile {
+  id: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
+  profile: Profile | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  signUp: (email: string, password: string, username?: string, fullName?: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const SESSION_KEY = 'avtomaktab_session';
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Validate session on mount and page refresh
-  useEffect(() => {
-    const validateSession = async () => {
-      try {
-        const sessionData = localStorage.getItem(SESSION_KEY);
-        if (!sessionData) {
-          setIsLoading(false);
-          return;
-        }
-
-        const { userId, passwordHash } = JSON.parse(sessionData);
-        
-        // Verify user exists and password matches
-        const { data, error } = await supabase
-          .from('user2')
-          .select('id, login, password')
-          .eq('id', userId)
-          .single();
-
-        if (error || !data || data.password !== passwordHash) {
-          // Invalid session - clear and logout
-          localStorage.removeItem(SESSION_KEY);
-          setUser(null);
-        } else {
-          setUser({ id: data.id, login: data.login });
-        }
-      } catch (err) {
-        console.error('Session validation error:', err);
-        localStorage.removeItem(SESSION_KEY);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    validateSession();
-  }, []);
-
-  const login = async (username: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const fetchProfile = async (userId: string) => {
     try {
-      // Hash the entered password
-      const passwordHash = await hashPassword(password);
-
-      // Query user2 table
       const { data, error } = await supabase
-        .from('user2')
-        .select('id, login, password')
-        .eq('login', username)
-        .single();
+        .from('profiles')
+        .select('id, username, full_name, avatar_url')
+        .eq('id', userId)
+        .maybeSingle();
 
-      if (error || !data) {
-        return { success: false, error: 'Foydalanuvchi topilmadi' };
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
       }
-
-      // Compare hashed passwords
-      if (data.password !== passwordHash) {
-        return { success: false, error: 'Parol noto\'g\'ri' };
-      }
-
-      // Save session
-      localStorage.setItem(SESSION_KEY, JSON.stringify({
-        userId: data.id,
-        passwordHash: data.password
-      }));
-
-      setUser({ id: data.id, login: data.login });
-      return { success: true };
+      return data;
     } catch (err) {
-      console.error('Login error:', err);
-      return { success: false, error: 'Tizim xatosi yuz berdi' };
+      console.error('Profile fetch error:', err);
+      return null;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem(SESSION_KEY);
+  const refreshProfile = async () => {
+    if (user) {
+      const profileData = await fetchProfile(user.id);
+      setProfile(profileData);
+    }
+  };
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Defer profile fetch to avoid deadlock
+        if (session?.user) {
+          setTimeout(() => {
+            fetchProfile(session.user.id).then(setProfile);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchProfile(session.user.id).then(setProfile);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signUp = async (
+    email: string, 
+    password: string, 
+    username?: string, 
+    fullName?: string
+  ): Promise<{ error: Error | null }> => {
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            username: username || null,
+            full_name: fullName || null,
+          }
+        }
+      });
+
+      if (error) return { error };
+      return { error: null };
+    } catch (err) {
+      return { error: err as Error };
+    }
+  };
+
+  const signIn = async (email: string, password: string): Promise<{ error: Error | null }> => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) return { error };
+      return { error: null };
+    } catch (err) {
+      return { error: err as Error };
+    }
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
     setUser(null);
+    setSession(null);
+    setProfile(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      profile, 
+      isLoading, 
+      signUp, 
+      signIn, 
+      signOut,
+      refreshProfile 
+    }}>
       {children}
     </AuthContext.Provider>
   );

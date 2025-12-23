@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { QuestionNavigation } from "./QuestionNavigation";
 import { TestResults } from "./TestResults";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTestResults } from "@/hooks/useTestResults";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -58,6 +60,8 @@ interface TestInterfaceProps {
 
 export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
   const { t, questionLang } = useLanguage();
+  const { user } = useAuth();
+  const { saveTestResult } = useTestResults();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +73,7 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
   const [showFinishDialog, setShowFinishDialog] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [testStartTime] = useState(Date.now());
+  const [resultSaved, setResultSaved] = useState(false);
   
   const autoAdvanceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -214,6 +219,16 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
     return { correct, incorrect };
   };
 
+  // Save result when showing results
+  useEffect(() => {
+    if (showResults && user && !resultSaved) {
+      const stats = getTestStats();
+      const timeTaken = Math.floor((Date.now() - testStartTime) / 1000);
+      saveTestResult(variant, stats.correct, totalQuestions, timeTaken);
+      setResultSaved(true);
+    }
+  }, [showResults, user, resultSaved]);
+
   // Show results screen
   if (showResults) {
     const stats = getTestStats();
@@ -234,6 +249,7 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
           setCurrentQuestion(1);
           setTimeRemaining(30 * 60);
           setShowResults(false);
+          setResultSaved(false);
         }}
       />
     );
@@ -319,93 +335,95 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
         }}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 px-3 py-3 md:px-6 md:py-4 max-w-5xl mx-auto w-full overflow-y-auto">
-        {/* Question Number */}
-        <div className="text-xs md:text-sm text-muted-foreground mb-2">
-          {t("test.question")} {currentQuestion} / {totalQuestions}
-        </div>
-
-        {/* Desktop: Two-column layout */}
-        <div className="md:flex md:gap-6 md:items-start">
-          {/* Left Column: Question + Answers */}
-          <div className="md:flex-1">
-            {/* Question Text */}
-            <Card className="p-3 md:p-4 bg-card border-border mb-3">
-              <p className="text-sm md:text-base font-medium text-foreground leading-relaxed">
-                {question.text}
-              </p>
-            </Card>
-
-            {/* Mobile Only: Question Image - Enlarged */}
-            {question.image && (
-              <Card className="md:hidden p-2 bg-card border-border mb-3 overflow-hidden">
-                <img
-                  src={question.image}
-                  alt="Question illustration"
-                  className="w-full max-w-[280px] h-auto mx-auto object-contain rounded"
-                />
-              </Card>
-            )}
-
-            {/* Answer Options */}
-            <div className="space-y-2 md:space-y-2.5">
-              {question.answers.map((answer) => {
-                const state = getAnswerState(answer.id);
-                const isSelected = selectedAnswer === answer.id;
-                
-                return (
-                  <button
-                    key={answer.id}
-                    onClick={() => handleAnswerSelect(answer.id)}
-                    disabled={isRevealed}
-                    className={`
-                      w-full p-3 md:p-3.5 rounded-lg border text-left transition-all duration-200
-                      flex items-center gap-3
-                      ${state === "correct" 
-                        ? "border-transparent bg-green-500 text-white" 
-                        : state === "incorrect"
-                        ? "border-transparent bg-red-400 text-white"
-                        : isSelected
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-card hover:bg-muted/50 text-foreground"
-                      }
-                    `}
-                  >
-                    <div className={`
-                      w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0
-                      ${state === "correct"
-                        ? "bg-white/20"
-                        : state === "incorrect"
-                        ? "bg-white/20"
-                        : "border-2 border-muted-foreground/50"
-                      }
-                    `}>
-                      {state === "correct" ? (
-                        <Check className="w-4 h-4 text-white" />
-                      ) : state === "incorrect" ? (
-                        <X className="w-4 h-4 text-white" />
-                      ) : null}
-                    </div>
-                    <span className="text-sm md:text-sm font-medium">{answer.text}</span>
-                  </button>
-                );
-              })}
-            </div>
+      {/* Main Content - Full width usage */}
+      <main className="flex-1 px-4 py-4 md:px-8 md:py-5 w-full overflow-y-auto">
+        <div className="max-w-7xl mx-auto">
+          {/* Question Number */}
+          <div className="text-sm md:text-base text-muted-foreground mb-3 font-medium">
+            {t("test.question")} {currentQuestion} / {totalQuestions}
           </div>
 
-          {/* Right Column: Image (Desktop only) */}
-          {question.image && (
-            <div className="hidden md:block md:w-[320px] md:flex-shrink-0">
-              <Card className="p-3 bg-card border-border overflow-hidden">
-                <img
-                  src={question.image}
-                  alt="Question illustration"
-                  className="w-full h-auto object-contain rounded"
-                />
+          {/* Desktop: 60/40 split layout */}
+          <div className="md:flex md:gap-8 md:items-start">
+            {/* Left Column: Question + Answers (60%) */}
+            <div className="md:w-[60%] md:flex-shrink-0">
+              {/* Question Text */}
+              <Card className="p-4 md:p-5 bg-card border-border mb-4">
+                <p className="text-base md:text-lg font-medium text-foreground leading-relaxed">
+                  {question.text}
+                </p>
               </Card>
+
+              {/* Mobile Only: Question Image */}
+              {question.image && (
+                <Card className="md:hidden p-3 bg-card border-border mb-4 overflow-hidden">
+                  <img
+                    src={question.image}
+                    alt="Question illustration"
+                    className="w-full max-w-[300px] h-auto mx-auto object-contain rounded"
+                  />
+                </Card>
+              )}
+
+              {/* Answer Options */}
+              <div className="space-y-3">
+                {question.answers.map((answer) => {
+                  const state = getAnswerState(answer.id);
+                  const isSelected = selectedAnswer === answer.id;
+                  
+                  return (
+                    <button
+                      key={answer.id}
+                      onClick={() => handleAnswerSelect(answer.id)}
+                      disabled={isRevealed}
+                      className={`
+                        w-full p-4 md:p-4 rounded-lg border text-left transition-all duration-200
+                        flex items-center gap-4
+                        ${state === "correct" 
+                          ? "border-transparent bg-green-500 text-white" 
+                          : state === "incorrect"
+                          ? "border-transparent bg-red-400 text-white"
+                          : isSelected
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-card hover:bg-muted/50 text-foreground"
+                        }
+                      `}
+                    >
+                      <div className={`
+                        w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center flex-shrink-0
+                        ${state === "correct"
+                          ? "bg-white/20"
+                          : state === "incorrect"
+                          ? "bg-white/20"
+                          : "border-2 border-muted-foreground/50"
+                        }
+                      `}>
+                        {state === "correct" ? (
+                          <Check className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                        ) : state === "incorrect" ? (
+                          <X className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                        ) : null}
+                      </div>
+                      <span className="text-base md:text-base font-medium">{answer.text}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          )}
+
+            {/* Right Column: Image (Desktop only - 40%) */}
+            {question.image && (
+              <div className="hidden md:block md:w-[40%] md:flex-shrink-0">
+                <Card className="p-4 bg-card border-border overflow-hidden sticky top-4">
+                  <img
+                    src={question.image}
+                    alt="Question illustration"
+                    className="w-full h-auto object-contain rounded max-h-[60vh]"
+                  />
+                </Card>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
