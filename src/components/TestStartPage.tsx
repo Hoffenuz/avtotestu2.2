@@ -47,34 +47,44 @@ export const TestStartPage = ({ onStartTest }: TestStartPageProps) => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       {/* Mobile Layout */}
       <div className="lg:hidden flex flex-col h-screen overflow-hidden">
-        {/* Mobile Header */}
-        <header className="bg-card/80 backdrop-blur-sm border-b border-border px-4 py-2 shrink-0">
+        {/* Mobile Header - Profile Section */}
+        <header className="bg-card/80 backdrop-blur-sm border-b border-border px-4 py-3 shrink-0">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-base font-bold text-foreground">{t("app.title")}</h1>
-              <p className="text-[10px] text-muted-foreground">{t("app.subtitle")}</p>
-            </div>
             {user ? (
               <Button
-                variant="ghost"
+                variant="default"
                 size="sm"
                 onClick={() => navigate('/profile')}
-                className="flex items-center gap-1.5"
+                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
               >
                 <User className="w-4 h-4" />
-                <span className="text-xs">{profile?.username || 'Profil'}</span>
+                <span className="text-sm font-medium">{profile?.full_name || profile?.username || 'Profil'}</span>
               </Button>
             ) : (
               <Button
-                variant="outline"
+                variant="default"
                 size="sm"
                 onClick={() => navigate('/auth')}
-                className="flex items-center gap-1.5"
+                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
               >
                 <LogIn className="w-4 h-4" />
-                <span className="text-xs">Kirish</span>
+                <span className="text-sm font-medium">Kirish</span>
               </Button>
             )}
+            {/* Language quick switch */}
+            <div className="flex gap-1">
+              {languages.map((lang) => (
+                <Button
+                  key={lang.id}
+                  variant={language === lang.id ? "secondary" : "ghost"}
+                  size="sm"
+                  className="px-2 h-8"
+                  onClick={() => setLanguage(lang.id)}
+                >
+                  <span className="text-sm">{lang.flag}</span>
+                </Button>
+              ))}
+            </div>
           </div>
         </header>
 
@@ -184,30 +194,32 @@ export const TestStartPage = ({ onStartTest }: TestStartPageProps) => {
       <div className="hidden lg:flex h-screen overflow-hidden">
         {/* Left Sidebar - Desktop */}
         <aside className="w-80 xl:w-96 bg-card border-r border-border p-6 flex flex-col overflow-y-auto">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-xl font-bold text-foreground">{t("app.title")}</h1>
-              <p className="text-sm text-muted-foreground mt-1">{t("app.subtitle")}</p>
-            </div>
+          {/* Profile Section */}
+          <div className="mb-6 pb-6 border-b border-border">
             {user ? (
               <Button
-                variant="ghost"
-                size="sm"
+                variant="default"
                 onClick={() => navigate('/profile')}
-                className="flex items-center gap-2"
+                className="w-full flex items-center gap-3 h-auto py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
               >
-                <User className="w-4 h-4" />
-                <span className="text-sm">{profile?.username || 'Profil'}</span>
+                <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-semibold text-base">{profile?.full_name || profile?.username || 'Profil'}</div>
+                  {profile?.username && profile?.full_name && (
+                    <div className="text-xs text-primary-foreground/70">@{profile.username}</div>
+                  )}
+                </div>
               </Button>
             ) : (
               <Button
-                variant="outline"
-                size="sm"
+                variant="default"
                 onClick={() => navigate('/auth')}
-                className="flex items-center gap-2"
+                className="w-full flex items-center gap-3 h-auto py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
               >
-                <LogIn className="w-4 h-4" />
-                <span className="text-sm">Kirish</span>
+                <LogIn className="w-5 h-5" />
+                <span className="font-semibold">Kirish</span>
               </Button>
             )}
           </div>
@@ -306,17 +318,17 @@ export const TestStartPage = ({ onStartTest }: TestStartPageProps) => {
         </aside>
 
         {/* Main Content - Desktop */}
-        <main className="flex-1 flex flex-col items-start justify-start p-8 bg-gradient-to-br from-background to-primary/5 overflow-y-auto">
-          {/* Top-Left Test Start Section */}
-          <div className="w-full max-w-xl">
+        <main className="flex-1 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-background to-primary/5 overflow-y-auto">
+          {/* Centered Test Start Section */}
+          <div className="w-full max-w-2xl text-center">
             {/* Hero Section */}
-            <div className="flex items-start gap-5 mb-8">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Car className="w-10 h-10 text-primary" />
+            <div className="flex flex-col items-center gap-4 mb-10">
+              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                <Car className="w-12 h-12 text-primary" />
               </div>
-              <div className="text-left">
-                <h2 className="text-3xl font-bold text-foreground mb-2">{t("test.ready")}</h2>
-                <p className="text-base text-muted-foreground leading-relaxed">{t("test.readyDescription")}</p>
+              <div>
+                <h2 className="text-4xl font-bold text-foreground mb-3">{t("test.ready")}</h2>
+                <p className="text-lg text-muted-foreground leading-relaxed max-w-md mx-auto">{t("test.readyDescription")}</p>
               </div>
             </div>
 
