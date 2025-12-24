@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { User, LogOut, Trophy, CheckCircle, XCircle, ArrowLeft, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { User, LogOut, Trophy, CheckCircle, XCircle, ArrowLeft, Clock, Edit2, Save, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TestResult {
   id: string;
@@ -17,17 +19,27 @@ interface TestResult {
 }
 
 const Profile = () => {
-  const { user, profile, signOut, isLoading } = useAuth();
-  const { t } = useLanguage();
+  const { user, profile, signOut, isLoading, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [results, setResults] = useState<TestResult[]>([]);
   const [loadingResults, setLoadingResults] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editUsername, setEditUsername] = useState('');
+  const [editFullName, setEditFullName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
       navigate('/auth');
     }
   }, [user, isLoading, navigate]);
+
+  useEffect(() => {
+    if (profile) {
+      setEditUsername(profile.username || '');
+      setEditFullName(profile.full_name || '');
+    }
+  }, [profile]);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -57,7 +69,40 @@ const Profile = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate('/auth');
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          username: editUsername.trim() || null,
+          full_name: editFullName.trim() || null,
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        toast.error('Profil yangilanmadi: ' + error.message);
+      } else {
+        toast.success('Profil muvaffaqiyatli yangilandi');
+        await refreshProfile();
+        setIsEditing(false);
+      }
+    } catch (err) {
+      toast.error('Xatolik yuz berdi');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditUsername(profile?.username || '');
+    setEditFullName(profile?.full_name || '');
+    setIsEditing(false);
   };
 
   const formatTime = (seconds: number | null) => {
@@ -90,49 +135,136 @@ const Profile = () => {
 
   if (!user) return null;
 
+  const displayName = profile?.full_name || profile?.username || 'Foydalanuvchi';
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b border-border px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Orqaga
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSignOut}
-            className="text-destructive border-destructive/30 hover:bg-destructive/10"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Chiqish
-          </Button>
-        </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-4 py-6 md:py-8">
-        {/* Profile Card */}
-        <Card className="p-6 mb-6">
+      {/* Header with User Name */}
+      <header className="bg-primary text-primary-foreground px-4 py-6 md:py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="text-primary-foreground hover:bg-primary-foreground/10"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Orqaga
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSignOut}
+              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Chiqish
+            </Button>
+          </div>
+          
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="w-8 h-8 text-primary" />
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+              <User className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-foreground">
-                {profile?.full_name || profile?.username || 'Foydalanuvchi'}
-              </h1>
-              <p className="text-muted-foreground">{user.email}</p>
-              {profile?.username && (
-                <p className="text-sm text-muted-foreground">@{profile.username}</p>
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-3xl font-bold">{displayName}</h1>
+              <p className="text-primary-foreground/80 text-sm md:text-base">{user.email || user.phone}</p>
+              {profile?.username && profile?.full_name && (
+                <p className="text-primary-foreground/60 text-sm">@{profile.username}</p>
               )}
             </div>
           </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-6 md:py-8 -mt-4">
+        {/* Profile Edit Card */}
+        <Card className="p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <User className="w-5 h-5 text-primary" />
+              Profil ma'lumotlari
+            </h2>
+            {!isEditing ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Tahrirlash
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancelEdit}
+                  disabled={isSaving}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Bekor qilish
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveProfile}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Saqlash
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {isEditing ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">To'liq ism</Label>
+                <Input
+                  id="fullName"
+                  placeholder="Ismingizni kiriting"
+                  value={editFullName}
+                  onChange={(e) => setEditFullName(e.target.value)}
+                  disabled={isSaving}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="username">Foydalanuvchi nomi</Label>
+                <Input
+                  id="username"
+                  placeholder="@username"
+                  value={editUsername}
+                  onChange={(e) => setEditUsername(e.target.value)}
+                  disabled={isSaving}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">To'liq ism</p>
+                <p className="font-medium text-foreground">{profile?.full_name || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Foydalanuvchi nomi</p>
+                <p className="font-medium text-foreground">{profile?.username ? `@${profile.username}` : '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                <p className="font-medium text-foreground">{user.email || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Telefon</p>
+                <p className="font-medium text-foreground">{user.phone || '-'}</p>
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* Stats Summary */}

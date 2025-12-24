@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin: {
+        Row: {
+          created_at: string
+          id: number
+          login: string
+          parol: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          login: string
+          parol?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          login?: string
+          parol?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -71,6 +92,27 @@ export type Database = {
           total_questions?: number
           user_id?: string
           variant?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }

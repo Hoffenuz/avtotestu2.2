@@ -306,42 +306,42 @@ export const TestStartPage = ({ onStartTest }: TestStartPageProps) => {
         </aside>
 
         {/* Main Content - Desktop */}
-        <main className="flex-1 flex flex-col p-8 bg-gradient-to-br from-background to-primary/5 overflow-y-auto">
+        <main className="flex-1 flex flex-col items-start justify-start p-8 bg-gradient-to-br from-background to-primary/5 overflow-y-auto">
           {/* Top-Left Test Start Section */}
-          <div className="max-w-lg">
+          <div className="w-full max-w-xl">
             {/* Hero Section */}
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Car className="w-8 h-8 text-primary" />
+            <div className="flex items-start gap-5 mb-8">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Car className="w-10 h-10 text-primary" />
               </div>
               <div className="text-left">
-                <h2 className="text-2xl font-bold text-foreground">{t("test.ready")}</h2>
-                <p className="text-sm text-muted-foreground">{t("test.readyDescription")}</p>
+                <h2 className="text-3xl font-bold text-foreground mb-2">{t("test.ready")}</h2>
+                <p className="text-base text-muted-foreground leading-relaxed">{t("test.readyDescription")}</p>
               </div>
             </div>
 
             {/* Stats Cards - Desktop */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <Card className="p-4 bg-card border-border text-center">
-                <HelpCircle className="w-6 h-6 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold text-foreground">20</div>
-                <div className="text-xs text-muted-foreground">{t("test.questions")}</div>
+            <div className="grid grid-cols-3 gap-5 mb-8">
+              <Card className="p-5 bg-card border-border text-center">
+                <HelpCircle className="w-8 h-8 text-primary mx-auto mb-3" />
+                <div className="text-3xl font-bold text-foreground">20</div>
+                <div className="text-sm text-muted-foreground mt-1">{t("test.questions")}</div>
               </Card>
-              <Card className="p-4 bg-card border-border text-center">
-                <Clock className="w-6 h-6 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold text-foreground">30</div>
-                <div className="text-xs text-muted-foreground">{t("test.minutes")}</div>
+              <Card className="p-5 bg-card border-border text-center">
+                <Clock className="w-8 h-8 text-primary mx-auto mb-3" />
+                <div className="text-3xl font-bold text-foreground">30</div>
+                <div className="text-sm text-muted-foreground mt-1">{t("test.minutes")}</div>
               </Card>
-              <Card className="p-4 bg-card border-border text-center">
-                <CheckCircle className="w-6 h-6 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold text-foreground">80%</div>
-                <div className="text-xs text-muted-foreground">{t("test.passingScore")}</div>
+              <Card className="p-5 bg-card border-border text-center">
+                <CheckCircle className="w-8 h-8 text-primary mx-auto mb-3" />
+                <div className="text-3xl font-bold text-foreground">80%</div>
+                <div className="text-sm text-muted-foreground mt-1">{t("test.passingScore")}</div>
               </Card>
             </div>
 
             {/* Selected Variant Display */}
             {selectedVariant && (
-              <div className="mb-4 text-base font-semibold text-primary">
+              <div className="mb-5 text-lg font-semibold text-primary">
                 {t("test.selected")}: {t("test.variant")} {selectedVariant}
               </div>
             )}
@@ -349,7 +349,7 @@ export const TestStartPage = ({ onStartTest }: TestStartPageProps) => {
             {/* Start Button - Desktop */}
             <Button
               size="lg"
-              className="w-full max-w-sm h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90"
+              className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90"
               onClick={handleStartTest}
               disabled={selectedVariant === null}
             >
