@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, Home, Phone, BookOpen, Car, FileText, MapPin } from "lucide-react";
+import { Menu, X, Home, Phone, BookOpen, Car, FileText, MapPin, Info } from "lucide-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -11,6 +11,7 @@ const navItems = [
   { path: "/belgilar", label: "Yo'l belgilari", icon: Car },
   { path: "/variant", label: "Variantlar", icon: FileText },
   { path: "/darslik", label: "Darslik", icon: BookOpen },
+  { path: "/qoshimcha", label: "Qo'shimcha", icon: Info },
   { path: "/contact", label: "Aloqa", icon: Phone },
 ];
 

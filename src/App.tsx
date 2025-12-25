@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Belgilar from "./pages/Belgilar";
 import Contact from "./pages/Contact";
 import Darslik from "./pages/Darslik";
+import Qoshimcha from "./pages/Qoshimcha";
 import Variant from "./pages/Variant";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -29,6 +30,7 @@ const App = () => (
               <Route path="/belgilar" element={<Belgilar />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/darslik" element={<Darslik />} />
+              <Route path="/qoshimcha" element={<Qoshimcha />} />
               <Route path="/variant" element={<Variant />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
