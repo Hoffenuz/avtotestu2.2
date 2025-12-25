@@ -1,190 +1,214 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Features } from "@/components/home/Features";
-import { Socials } from "@/components/home/Socials";
-import { Gallery } from "@/components/home/Gallery";
+import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { 
   Play, 
   Car, 
   FileText, 
-  BookOpen, 
+  ListChecks,
   ChevronDown,
-  Info,
-  ListChecks
+  GraduationCap,
+  Shield,
+  Clock,
+  Award,
+  User,
+  BarChart3,
+  BookOpen,
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-const stats = [
-  { value: "20+", label: "Variantlar" },
-  { value: "1000+", label: "Savollar" },
-  { value: "200+", label: "Yo'l belgilari" },
-  { value: "24/7", label: "Qo'llab-quvvat" },
-];
-
-const quickActions = [
+const features = [
   {
-    to: "/variant",
-    icon: FileText,
-    title: "Variantlar",
-    description: "20 ta savoldan iborat test variantlari",
-    gradient: "from-primary/5 to-primary/10",
-    hoverBorder: "hover:border-primary",
-    iconBg: "bg-primary",
+    icon: GraduationCap,
+    title: "Professional Avtomaktab",
+    description: "Tajribali ustozlar rahbarligida sifatli ta'lim oling."
   },
   {
-    to: "/belgilar",
-    icon: Car,
-    title: "Yo'l belgilari",
-    description: "Barcha yo'l belgilarini o'rganing",
-    gradient: "from-success/5 to-success/10",
-    hoverBorder: "hover:border-success",
-    iconBg: "bg-success",
+    icon: Shield,
+    title: "Zamonaviy Avto Texnika",
+    description: "Eng so'nggi texnologiyalar bilan jihozlangan avtomobillar."
   },
   {
-    to: "/darslik",
-    icon: BookOpen,
-    title: "Darslik",
-    description: "Yo'l harakati qoidalari darsligi",
-    gradient: "from-warning/5 to-warning/10",
-    hoverBorder: "hover:border-warning",
-    iconBg: "bg-warning",
-  },
-  {
-    to: "/qoshimcha",
-    icon: Info,
-    title: "Qo'shimcha",
-    description: "Foydali maslahatlar va yo'riqnomalar",
-    gradient: "from-purple-500/5 to-purple-500/10",
-    hoverBorder: "hover:border-purple-500",
-    iconBg: "bg-purple-500",
-  },
+    icon: Clock,
+    title: "Diqqat!",
+    description: "Sayt test rejimida ishlamoqda. Savol va takliflaringizni telegram orqali yuboring."
+  }
 ];
 
 export default function Home() {
   const [aboutOpen, setAboutOpen] = useState(false);
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "U";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
 
   return (
     <MainLayout>
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-hover to-primary overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary-foreground rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary-foreground rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-foreground rounded-full blur-3xl opacity-20" />
+      {/* Hero Section with background image */}
+      <section className="relative min-h-[500px] md:min-h-[600px] flex items-center overflow-hidden">
+        {/* Background with overlay */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1920&q=80')`,
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/85 to-primary/80" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-32">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 leading-tight">
-              Avtoexclusive <br className="md:hidden" />O'quv Markazi!
+        {/* Content */}
+        <div className="relative w-full max-w-7xl mx-auto px-4 py-16">
+          {/* Hero Card */}
+          <div className="max-w-4xl mx-auto bg-primary/80 backdrop-blur-sm rounded-3xl p-8 md:p-12 text-center">
+            <h1 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-4 leading-tight" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              Avtoexclusive o'quv markazi!
             </h1>
-            <p className="text-lg md:text-xl text-primary-foreground/90 mb-10 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
               Professional haydovchilik guvohnomasini olish uchun zamonaviy platforma
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
               <Link to="/variant">
-                <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 gap-2 text-lg px-8 py-6 rounded-xl shadow-xl">
-                  <Play className="w-5 h-5" />
-                  Variantlar
+                <Button 
+                  size="lg" 
+                  className="bg-[hsl(var(--cta-orange))] hover:bg-[hsl(var(--cta-orange-hover))] text-white gap-2 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 rounded-full shadow-xl font-semibold"
+                >
+                  <Play className="w-4 h-4 md:w-5 md:h-5" />
+                  Test ishlash
                 </Button>
               </Link>
               <Link to="/belgilar">
-                <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2 text-lg px-8 py-6 rounded-xl">
-                  <Car className="w-5 h-5" />
+                <Button 
+                  size="lg" 
+                  className="bg-[hsl(var(--cta-green))] hover:bg-[hsl(var(--cta-green-hover))] text-white gap-2 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 rounded-full shadow-xl font-semibold"
+                >
+                  <Car className="w-4 h-4 md:w-5 md:h-5" />
                   Yo'l belgilari
                 </Button>
               </Link>
-              <Link to="/qoshimcha">
-                <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2 text-lg px-8 py-6 rounded-xl">
-                  <ListChecks className="w-5 h-5" />
+              <Link to="/variant">
+                <Button 
+                  size="lg" 
+                  className="bg-[hsl(var(--cta-orange))] hover:bg-[hsl(var(--cta-orange-hover))] text-white gap-2 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 rounded-full shadow-xl font-semibold"
+                >
+                  <Play className="w-4 h-4 md:w-5 md:h-5" />
+                  Variantlar
+                </Button>
+              </Link>
+              <Link to="/mavzuli">
+                <Button 
+                  size="lg" 
+                  className="bg-[hsl(var(--cta-red))] hover:bg-[hsl(var(--cta-red-hover))] text-white gap-2 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 rounded-full shadow-xl font-semibold"
+                >
+                  <Play className="w-4 h-4 md:w-5 md:h-5" />
                   Mavzuli testlar
                 </Button>
               </Link>
             </div>
           </div>
         </div>
-
-        {/* Wave decoration */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path 
-              d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" 
-              fill="hsl(var(--background))"
-            />
-          </svg>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-12 bg-background">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <Card key={index} className="text-center border-none shadow-lg bg-card hover:shadow-xl transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                    {stat.value}
-                  </div>
-                  <div className="text-muted-foreground text-sm">
-                    {stat.label}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* Features Section */}
-      <Features />
-
-      {/* Quick Actions */}
       <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Tez boshlash
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              Bizning Afzalliklar
             </h2>
-            <p className="text-muted-foreground">
-              O'zingizga kerakli bo'limni tanlang
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {quickActions.map((action, index) => {
-              const Icon = action.icon;
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
               return (
-                <Link key={index} to={action.to} className="group">
-                  <Card className={`h-full hover:shadow-xl transition-all duration-300 border-2 border-transparent ${action.hoverBorder} bg-gradient-to-br ${action.gradient} hover:-translate-y-1`}>
-                    <CardContent className="pt-8 pb-6 text-center">
-                      <div className={`w-20 h-20 mx-auto mb-4 ${action.iconBg} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg`}>
-                        <Icon className="w-10 h-10 text-primary-foreground" />
-                      </div>
-                      <h3 className="font-bold text-xl text-foreground mb-2">
-                        {action.title}
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {action.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <Card key={index} className="border-none shadow-lg bg-card hover:shadow-xl transition-shadow">
+                  <CardContent className="pt-8 pb-6 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center">
+                      <Icon className="w-8 h-8 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-xl text-foreground mb-2" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {feature.description}
+                    </p>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* Socials Section */}
-      <Socials />
-
-      {/* Gallery Section */}
-      <Gallery />
+      {/* Profile Section - Only for logged in users */}
+      {user && (
+        <section className="py-16 bg-secondary/30">
+          <div className="max-w-4xl mx-auto px-4">
+            <Card className="border-none shadow-xl overflow-hidden">
+              <CardContent className="p-0">
+                <div className="bg-primary p-6 text-center">
+                  <Avatar className="h-20 w-20 mx-auto mb-4 bg-[hsl(var(--cta-orange))]">
+                    <AvatarFallback className="bg-[hsl(var(--cta-orange))] text-white text-2xl font-bold">
+                      {getInitials(profile?.full_name || profile?.username)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <h3 className="text-2xl font-bold text-primary-foreground" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    {profile?.full_name || profile?.username || 'Foydalanuvchi'}
+                  </h3>
+                  {profile?.username && profile?.full_name && (
+                    <p className="text-primary-foreground/70">@{profile.username}</p>
+                  )}
+                </div>
+                <div className="p-6 bg-card">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Button 
+                      variant="outline" 
+                      className="flex flex-col items-center gap-2 h-auto py-4"
+                      onClick={() => navigate('/profile')}
+                    >
+                      <User className="w-6 h-6 text-primary" />
+                      <span className="text-sm">Profil</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex flex-col items-center gap-2 h-auto py-4"
+                      onClick={() => navigate('/profile')}
+                    >
+                      <BarChart3 className="w-6 h-6 text-primary" />
+                      <span className="text-sm">Statistika</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex flex-col items-center gap-2 h-auto py-4"
+                      onClick={() => navigate('/darslik')}
+                    >
+                      <BookOpen className="w-6 h-6 text-primary" />
+                      <span className="text-sm">Darslik</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex flex-col items-center gap-2 h-auto py-4"
+                      onClick={() => navigate('/profile')}
+                    >
+                      <Settings className="w-6 h-6 text-primary" />
+                      <span className="text-sm">Sozlamalar</span>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
 
       {/* About Section */}
       <section className="py-16 bg-background">
@@ -194,7 +218,7 @@ export default function Home() {
               onClick={() => setAboutOpen(!aboutOpen)}
               className="w-full p-6 flex items-center justify-between text-left bg-card hover:bg-secondary/50 transition-colors"
             >
-              <span className="font-bold text-lg text-foreground">
+              <span className="font-bold text-lg text-foreground" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                 AvtoTest haqida qisqacha
               </span>
               <ChevronDown 

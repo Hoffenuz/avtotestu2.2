@@ -11,6 +11,8 @@ import Contact from "./pages/Contact";
 import Darslik from "./pages/Darslik";
 import Qoshimcha from "./pages/Qoshimcha";
 import Variant from "./pages/Variant";
+import MavzuliTestlar from "./pages/MavzuliTestlar";
+import Pro from "./pages/Pro";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -32,6 +34,8 @@ const App = () => (
               <Route path="/darslik" element={<Darslik />} />
               <Route path="/qoshimcha" element={<Qoshimcha />} />
               <Route path="/variant" element={<Variant />} />
+              <Route path="/mavzuli" element={<MavzuliTestlar />} />
+              <Route path="/pro" element={<Pro />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
