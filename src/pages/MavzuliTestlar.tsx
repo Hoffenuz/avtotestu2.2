@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { MavzuliTestInterface } from "@/components/MavzuliTestInterface";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { User, LogIn, ChevronDown, ChevronUp, BookOpen, Play, Clock, CheckCircle, HelpCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { User, LogIn, ChevronDown, ChevronUp, BookOpen, Play, Clock, CheckCircle, HelpCircle, Home } from "lucide-react";
 
 const topics = [
   { id: '32', name: 'Yangi Savollar' },
@@ -45,27 +46,50 @@ const topics = [
 
 export default function MavzuliTestlar() {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [testStarted, setTestStarted] = useState(false);
   const [showAllTopics, setShowAllTopics] = useState(false);
-  const { user, profile } = useAuth();
+  const { user, profile, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    if (!isLoading && !user) {
       navigate('/auth');
     }
-  }, [user, navigate]);
+  }, [user, isLoading, navigate]);
 
   const handleStartTest = () => {
     if (selectedTopic !== null) {
-      // Navigate to mavzuli test page with selected topic
-      window.location.href = `/mavzuli?topic=${selectedTopic}`;
+      setTestStarted(true);
     }
   };
 
-  // Show first 15 topics by default, all when expanded
   const visibleTopics = showAllTopics ? topics : topics.slice(0, 15);
 
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+        </div>
+      </MainLayout>
+    );
+  }
+
   if (!user) return null;
+
+  if (testStarted && selectedTopic) {
+    const topicName = topics.find(t => t.id === selectedTopic)?.name || '';
+    return (
+      <MavzuliTestInterface
+        onExit={() => {
+          setTestStarted(false);
+          setSelectedTopic(null);
+        }}
+        topicId={selectedTopic}
+        topicName={topicName}
+      />
+    );
+  }
 
   return (
     <MainLayout>
@@ -73,6 +97,14 @@ export default function MavzuliTestlar() {
         <div className="flex flex-col lg:flex-row min-h-full">
           {/* Left Sidebar */}
           <aside className="w-full lg:w-96 bg-card border-b lg:border-b-0 lg:border-r border-border p-4 lg:p-6 flex flex-col">
+            {/* Back to Home */}
+            <Link to="/" className="mb-4">
+              <Button variant="outline" className="w-full gap-2">
+                <Home className="w-4 h-4" />
+                Bosh sahifa
+              </Button>
+            </Link>
+
             {/* Profile Section */}
             <div className="mb-6 pb-6 border-b border-border">
               {user ? (
@@ -86,9 +118,6 @@ export default function MavzuliTestlar() {
                   </div>
                   <div className="flex-1 text-left">
                     <div className="font-semibold text-base">{profile?.full_name || profile?.username || 'Profil'}</div>
-                    {profile?.username && profile?.full_name && (
-                      <div className="text-xs text-primary-foreground/70">@{profile.username}</div>
-                    )}
                   </div>
                 </Button>
               ) : (
@@ -146,23 +175,11 @@ export default function MavzuliTestlar() {
                 </Button>
               )}
             </div>
-
-            {/* Instructions */}
-            <Card className="p-4 bg-muted/30 border-border mt-auto hidden lg:block">
-              <h3 className="text-sm font-semibold text-foreground mb-2">Ko'rsatmalar:</h3>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• Mavzu bo'yicha barcha savollar beriladi</li>
-                <li>• Har bir savolga 1 daqiqa vaqt beriladi</li>
-                <li>• To'g'ri javoblarni o'rganib boring</li>
-              </ul>
-            </Card>
           </aside>
 
           {/* Main Content */}
           <main className="flex-1 flex flex-col items-center justify-center p-6 lg:p-8 bg-gradient-to-br from-background to-primary/5">
-            {/* Centered Test Start Section */}
             <div className="w-full max-w-2xl text-center">
-              {/* Hero Section */}
               <div className="flex flex-col items-center gap-4 mb-10">
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
                   <BookOpen className="w-12 h-12 text-primary" />
@@ -177,7 +194,6 @@ export default function MavzuliTestlar() {
                 </div>
               </div>
 
-              {/* Stats Cards */}
               <div className="grid grid-cols-3 gap-4 lg:gap-5 mb-8">
                 <Card className="p-4 lg:p-5 bg-card border-border text-center">
                   <HelpCircle className="w-6 lg:w-8 h-6 lg:h-8 text-primary mx-auto mb-2 lg:mb-3" />
@@ -196,7 +212,6 @@ export default function MavzuliTestlar() {
                 </Card>
               </div>
 
-              {/* Selected Topic Display */}
               {selectedTopic && (
                 <div className="mb-5 p-4 bg-primary/10 rounded-xl">
                   <span className="text-lg font-semibold text-primary">
@@ -205,7 +220,6 @@ export default function MavzuliTestlar() {
                 </div>
               )}
 
-              {/* Start Button */}
               <Button
                 size="lg"
                 className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-[hsl(var(--cta-green))] hover:bg-[hsl(var(--cta-green-hover))]"

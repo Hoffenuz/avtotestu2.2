@@ -75,7 +75,19 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center p-4">
+      {/* Back to Home */}
+      <div className="w-full max-w-md mb-4">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/')}
+          className="gap-2"
+        >
+          <Car className="w-4 h-4" />
+          Bosh sahifa
+        </Button>
+      </div>
+
       <Card className="w-full max-w-md p-6 md:p-8 bg-card border-border shadow-xl">
         {/* Logo */}
         <div className="text-center mb-6">

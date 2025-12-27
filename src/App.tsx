@@ -12,6 +12,7 @@ import Darslik from "./pages/Darslik";
 import Qoshimcha from "./pages/Qoshimcha";
 import Variant from "./pages/Variant";
 import MavzuliTestlar from "./pages/MavzuliTestlar";
+import TestIshlash from "./pages/TestIshlash";
 import Pro from "./pages/Pro";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/qoshimcha" element={<Qoshimcha />} />
               <Route path="/variant" element={<Variant />} />
               <Route path="/mavzuli" element={<MavzuliTestlar />} />
+              <Route path="/test-ishlash" element={<TestIshlash />} />
               <Route path="/pro" element={<Pro />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />

@@ -59,7 +59,7 @@ export default function Qoshimcha() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/darslik">
-              <Button variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2 px-6 py-5 rounded-full">
+              <Button className="bg-white text-black hover:bg-gray-100 gap-2 px-6 py-5 rounded-full font-semibold">
                 <BookOpen className="w-5 h-5" />
                 Darslik
               </Button>

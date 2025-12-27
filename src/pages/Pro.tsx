@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,16 +78,32 @@ const plans = [
 
 export default function Pro() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  // Redirect logged-in users away from Pro page
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigate('/');
+    }
+  }, [user, isLoading, navigate]);
 
   const handleGetPro = () => {
     if (!user) {
       navigate('/auth');
       return;
     }
-    // Open Telegram for payment
     window.open('https://t.me/avtotestu_ad', '_blank');
   };
+
+  if (isLoading || user) {
+    return (
+      <MainLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>

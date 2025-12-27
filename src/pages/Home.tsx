@@ -76,7 +76,7 @@ export default function Home() {
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap justify-center gap-3 md:gap-4">
-              <Link to="/variant">
+              <Link to="/test-ishlash">
                 <Button 
                   size="lg" 
                   className="bg-[hsl(var(--cta-orange))] hover:bg-[hsl(var(--cta-orange-hover))] text-white gap-2 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 rounded-full shadow-xl font-semibold"
