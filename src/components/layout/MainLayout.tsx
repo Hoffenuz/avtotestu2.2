@@ -35,9 +35,11 @@ export function MainLayout({ children }: MainLayoutProps) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-foreground rounded-xl flex items-center justify-center shadow-md">
-                <Car className="w-6 h-6 text-primary" />
-              </div>
+              <img 
+                src="/logo.ico" 
+                alt="AvtoExclusive Logo" 
+                className="w-10 h-10 rounded-xl shadow-md object-contain"
+              />
               <span className="text-primary-foreground font-bold text-xl hidden sm:block tracking-tight" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                 AVTOEXCLUSIVE
               </span>
@@ -184,9 +186,11 @@ export function MainLayout({ children }: MainLayoutProps) {
             {/* About */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-primary-foreground rounded-xl flex items-center justify-center">
-                  <Car className="w-6 h-6 text-primary" />
-                </div>
+                <img 
+                  src="/logo.ico" 
+                  alt="AvtoExclusive Logo" 
+                  className="w-10 h-10 rounded-xl object-contain"
+                />
                 <span className="font-bold text-xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>AVTOEXCLUSIVE</span>
               </div>
               <p className="text-primary-foreground/70 text-sm leading-relaxed">

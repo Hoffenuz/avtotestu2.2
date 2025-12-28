@@ -156,7 +156,7 @@ const Profile = () => {
               variant="outline"
               size="sm"
               onClick={handleSignOut}
-              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+              className="bg-white text-black border-white hover:bg-gray-100"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Chiqish

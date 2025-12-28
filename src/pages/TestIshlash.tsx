@@ -26,31 +26,13 @@ const languages = [
 export default function TestIshlash() {
   const [testStarted, setTestStarted] = useState(false);
   const [selectedLang, setSelectedLang] = useState<'uz-lat' | 'uz' | 'ru'>('uz');
-  const { user, profile, isLoading } = useAuth();
+  const { user, profile } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, isLoading, navigate]);
-
-  useEffect(() => {
     setSelectedLang(language);
   }, [language]);
-
-  if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-        </div>
-      </MainLayout>
-    );
-  }
-
-  if (!user) return null;
 
   const dataFile = languages.find(l => l.id === selectedLang)?.file || "700baza.json";
 

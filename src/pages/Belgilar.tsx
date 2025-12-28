@@ -151,6 +151,16 @@ export default function Belgilar() {
                               alt={item.title}
                               className="max-w-full max-h-full object-contain"
                               loading="lazy"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (!target.dataset.retried) {
+                                  target.dataset.retried = 'true';
+                                  const src = target.src;
+                                  if (src.endsWith('.gif')) {
+                                    target.src = src.replace('.gif', '.png');
+                                  }
+                                }
+                              }}
                             />
                           </div>
                           <div className="p-3 text-center">

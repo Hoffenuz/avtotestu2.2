@@ -48,14 +48,17 @@ export default function MavzuliTestlar() {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [testStarted, setTestStarted] = useState(false);
   const [showAllTopics, setShowAllTopics] = useState(false);
-  const { user, profile, isLoading } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      navigate('/auth');
+  // On mobile, start test immediately when topic is selected
+  const handleTopicSelect = (topicId: string) => {
+    setSelectedTopic(topicId);
+    // Check if mobile (screen width < 1024px)
+    if (window.innerWidth < 1024) {
+      setTestStarted(true);
     }
-  }, [user, isLoading, navigate]);
+  };
 
   const handleStartTest = () => {
     if (selectedTopic !== null) {
@@ -64,18 +67,6 @@ export default function MavzuliTestlar() {
   };
 
   const visibleTopics = showAllTopics ? topics : topics.slice(0, 15);
-
-  if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-        </div>
-      </MainLayout>
-    );
-  }
-
-  if (!user) return null;
 
   if (testStarted && selectedTopic) {
     const topicName = topics.find(t => t.id === selectedTopic)?.name || '';
@@ -148,7 +139,7 @@ export default function MavzuliTestlar() {
                         ? "bg-primary text-primary-foreground" 
                         : "hover:bg-primary/10 hover:border-primary"
                     }`}
-                    onClick={() => setSelectedTopic(topic.id)}
+                    onClick={() => handleTopicSelect(topic.id)}
                   >
                     <span className="text-sm font-medium line-clamp-2">{topic.name}</span>
                   </Button>

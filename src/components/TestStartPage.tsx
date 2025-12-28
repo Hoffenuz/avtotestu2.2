@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Globe, BookOpen, Car, FileText, Clock, CheckCircle, HelpCircle, ChevronDown, ChevronUp, User, LogIn } from "lucide-react";
+import { Home, BookOpen, Car, FileText, Clock, CheckCircle, HelpCircle, ChevronDown, ChevronUp, User, LogIn, Globe } from "lucide-react";
 
 interface TestStartPageProps {
   onStartTest: (variant: number) => void;
@@ -50,27 +50,34 @@ export const TestStartPage = ({ onStartTest }: TestStartPageProps) => {
         {/* Mobile Header - Profile Section */}
         <header className="bg-card/80 backdrop-blur-sm border-b border-border px-4 py-3 shrink-0">
           <div className="flex items-center justify-between">
-            {user ? (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => navigate('/profile')}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
-              >
-                <User className="w-4 h-4" />
-                <span className="text-sm font-medium">{profile?.full_name || profile?.username || 'Profil'}</span>
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => navigate('/auth')}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
-              >
-                <LogIn className="w-4 h-4" />
-                <span className="text-sm font-medium">Kirish</span>
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              <Link to="/">
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Home className="w-4 h-4" />
+                </Button>
+              </Link>
+              {user ? (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="text-sm font-medium">{profile?.full_name || profile?.username || 'Profil'}</span>
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => navigate('/auth')}
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="text-sm font-medium">Kirish</span>
+                </Button>
+              )}
+            </div>
             {/* Language quick switch */}
             <div className="flex gap-1">
               {languages.map((lang) => (
@@ -194,6 +201,14 @@ export const TestStartPage = ({ onStartTest }: TestStartPageProps) => {
       <div className="hidden lg:flex h-screen overflow-hidden">
         {/* Left Sidebar - Desktop */}
         <aside className="w-80 xl:w-96 bg-card border-r border-border p-6 flex flex-col overflow-y-auto">
+          {/* Back to Home */}
+          <Link to="/" className="mb-4">
+            <Button variant="outline" className="w-full gap-2">
+              <Home className="w-4 h-4" />
+              Bosh sahifa
+            </Button>
+          </Link>
+
           {/* Profile Section */}
           <div className="mb-6 pb-6 border-b border-border">
             {user ? (
@@ -322,38 +337,38 @@ export const TestStartPage = ({ onStartTest }: TestStartPageProps) => {
           {/* Centered Test Start Section */}
           <div className="w-full max-w-2xl text-center">
             {/* Hero Section */}
-            <div className="flex flex-col items-center gap-4 mb-10">
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                <Car className="w-12 h-12 text-primary" />
+            <div className="flex flex-col items-center gap-4 mb-8">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                <Car className="w-10 h-10 text-primary" />
               </div>
               <div>
-                <h2 className="text-4xl font-bold text-foreground mb-3">{t("test.ready")}</h2>
-                <p className="text-lg text-muted-foreground leading-relaxed max-w-md mx-auto">{t("test.readyDescription")}</p>
+                <h2 className="text-3xl font-bold text-foreground mb-2">{t("test.ready")}</h2>
+                <p className="text-base text-muted-foreground leading-relaxed max-w-md mx-auto">{t("test.readyDescription")}</p>
               </div>
             </div>
 
             {/* Stats Cards - Desktop */}
-            <div className="grid grid-cols-3 gap-5 mb-8">
-              <Card className="p-5 bg-card border-border text-center">
-                <HelpCircle className="w-8 h-8 text-primary mx-auto mb-3" />
-                <div className="text-3xl font-bold text-foreground">20</div>
-                <div className="text-sm text-muted-foreground mt-1">{t("test.questions")}</div>
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <Card className="p-4 bg-card border-border text-center">
+                <HelpCircle className="w-6 h-6 text-primary mx-auto mb-2" />
+                <div className="text-2xl font-bold text-foreground">20</div>
+                <div className="text-xs text-muted-foreground mt-1">{t("test.questions")}</div>
               </Card>
-              <Card className="p-5 bg-card border-border text-center">
-                <Clock className="w-8 h-8 text-primary mx-auto mb-3" />
-                <div className="text-3xl font-bold text-foreground">30</div>
-                <div className="text-sm text-muted-foreground mt-1">{t("test.minutes")}</div>
+              <Card className="p-4 bg-card border-border text-center">
+                <Clock className="w-6 h-6 text-primary mx-auto mb-2" />
+                <div className="text-2xl font-bold text-foreground">30</div>
+                <div className="text-xs text-muted-foreground mt-1">{t("test.minutes")}</div>
               </Card>
-              <Card className="p-5 bg-card border-border text-center">
-                <CheckCircle className="w-8 h-8 text-primary mx-auto mb-3" />
-                <div className="text-3xl font-bold text-foreground">80%</div>
-                <div className="text-sm text-muted-foreground mt-1">{t("test.passingScore")}</div>
+              <Card className="p-4 bg-card border-border text-center">
+                <CheckCircle className="w-6 h-6 text-primary mx-auto mb-2" />
+                <div className="text-2xl font-bold text-foreground">80%</div>
+                <div className="text-xs text-muted-foreground mt-1">{t("test.passingScore")}</div>
               </Card>
             </div>
 
             {/* Selected Variant Display */}
             {selectedVariant && (
-              <div className="mb-5 text-lg font-semibold text-primary">
+              <div className="mb-4 text-base font-semibold text-primary">
                 {t("test.selected")}: {t("test.variant")} {selectedVariant}
               </div>
             )}
@@ -361,7 +376,7 @@ export const TestStartPage = ({ onStartTest }: TestStartPageProps) => {
             {/* Start Button - Desktop */}
             <Button
               size="lg"
-              className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90"
+              className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90"
               onClick={handleStartTest}
               disabled={selectedVariant === null}
             >
