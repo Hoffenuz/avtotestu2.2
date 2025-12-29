@@ -88,10 +88,7 @@ export default function Pro() {
   }, [user, isLoading, navigate]);
 
   const handleGetPro = () => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
+    // Open Telegram directly for payment
     window.open('https://t.me/avtotestu_ad', '_blank');
   };
 

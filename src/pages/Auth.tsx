@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,13 +23,15 @@ const Auth = () => {
   
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = (location.state as { returnTo?: string })?.returnTo || '/';
 
   // Redirect if already logged in
   useEffect(() => {
     if (user && !isLoading) {
-      navigate('/');
+      navigate(returnTo);
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, navigate, returnTo]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +62,7 @@ const Auth = () => {
         setError(error.message);
       }
     } else {
-      navigate('/');
+      navigate(returnTo);
     }
     
     setIsSubmitting(false);

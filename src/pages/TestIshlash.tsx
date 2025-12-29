@@ -2,18 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { 
   Home, 
-  User, 
-  LogIn, 
   Play, 
   Clock, 
-  CheckCircle, 
   HelpCircle,
-  Globe
+  CheckCircle
 } from "lucide-react";
 import { TestInterfaceBase } from "@/components/TestInterfaceBase";
 
@@ -26,8 +21,7 @@ const languages = [
 export default function TestIshlash() {
   const [testStarted, setTestStarted] = useState(false);
   const [selectedLang, setSelectedLang] = useState<'uz-lat' | 'uz' | 'ru'>('uz');
-  const { user, profile } = useAuth();
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,111 +49,98 @@ export default function TestIshlash() {
   };
 
   return (
-    <MainLayout>
-      <div className="min-h-[calc(100vh-64px)] bg-gradient-to-br from-background via-background to-primary/5 flex items-center">
-        <div className="w-full max-w-3xl mx-auto px-4 py-4">
-          {/* Top Bar: Home + Language Selection */}
-          <div className="flex items-center justify-between mb-4">
-            <Link to="/">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Home className="w-4 h-4" />
-                Bosh sahifa
-              </Button>
-            </Link>
-
-            {/* Language Toggle */}
-            <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-1">
-              {languages.map((lang) => (
-                <Button
-                  key={lang.id}
-                  variant={selectedLang === lang.id ? "default" : "ghost"}
-                  size="sm"
-                  className={`px-3 py-1 h-8 text-xs ${
-                    selectedLang === lang.id 
-                      ? "bg-primary text-primary-foreground" 
-                      : "hover:bg-primary/10"
-                  }`}
-                  onClick={() => handleLanguageChange(lang.id)}
-                >
-                  <span className="mr-1">{lang.flag}</span>
-                  {lang.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Compact Main Content */}
-          <div className="text-center">
-            {/* Profile + Hero inline */}
-            <div className="flex items-center justify-between mb-4">
-              {user ? (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => navigate('/profile')}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-primary-foreground"
-                >
-                  <User className="w-4 h-4" />
-                  <span className="font-medium text-sm">{profile?.full_name || profile?.username || 'Profil'}</span>
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => navigate('/auth')}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-primary-foreground"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span className="font-medium text-sm">Kirish</span>
-                </Button>
-              )}
-
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Play className="w-6 h-6 text-primary" />
-                </div>
-                <div className="text-left">
-                  <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                    Test ishlash
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    700 dan 20 ta tasodifiy savol
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats Cards - Compact */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <Card className="p-3 bg-card border-border text-center">
-                <HelpCircle className="w-5 h-5 text-primary mx-auto mb-1" />
-                <div className="text-xl font-bold text-foreground">20</div>
-                <div className="text-xs text-muted-foreground">Savollar</div>
-              </Card>
-              <Card className="p-3 bg-card border-border text-center">
-                <Clock className="w-5 h-5 text-primary mx-auto mb-1" />
-                <div className="text-xl font-bold text-foreground">30</div>
-                <div className="text-xs text-muted-foreground">daqiqa</div>
-              </Card>
-              <Card className="p-3 bg-card border-border text-center">
-                <CheckCircle className="w-5 h-5 text-primary mx-auto mb-1" />
-                <div className="text-xl font-bold text-foreground">80%</div>
-                <div className="text-xs text-muted-foreground">O'tish balli</div>
-              </Card>
-            </div>
-
-            {/* Start Button */}
-            <Button
-              size="lg"
-              className="w-full h-12 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-[hsl(var(--cta-green))] hover:bg-[hsl(var(--cta-green-hover))]"
-              onClick={() => setTestStarted(true)}
-            >
-              <Play className="w-5 h-5 mr-2" />
-              Testni boshlash
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col">
+      {/* Top Navigation Bar */}
+      <header className="w-full bg-card/80 backdrop-blur-sm border-b border-border px-4 py-3">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <Link to="/">
+            <Button variant="ghost" size="sm" className="gap-2 hover:bg-primary/10">
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Bosh sahifa</span>
             </Button>
+          </Link>
+
+          {/* Language Toggle */}
+          <div className="flex items-center gap-1 bg-background border border-border rounded-lg p-1">
+            {languages.map((lang) => (
+              <Button
+                key={lang.id}
+                variant={selectedLang === lang.id ? "default" : "ghost"}
+                size="sm"
+                className={`px-2 sm:px-3 py-1 h-8 text-xs ${
+                  selectedLang === lang.id 
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-primary/10"
+                }`}
+                onClick={() => handleLanguageChange(lang.id)}
+              >
+                <span className="mr-1">{lang.flag}</span>
+                <span className="hidden sm:inline">{lang.label}</span>
+              </Button>
+            ))}
           </div>
         </div>
-      </div>
-    </MainLayout>
+      </header>
+
+      {/* Main Content - Centered */}
+      <main className="flex-1 flex items-center justify-center px-4 py-6">
+        <div className="w-full max-w-md text-center space-y-6">
+          {/* Icon & Title */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+              <Play className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                Test ishlash
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                700 ta savoldan 20 ta tasodifiy
+              </p>
+            </div>
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex justify-center gap-6 sm:gap-10">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
+                <HelpCircle className="w-6 h-6 text-primary" />
+              </div>
+              <span className="text-xl font-bold text-foreground">20</span>
+              <span className="text-xs text-muted-foreground">Savollar</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
+                <Clock className="w-6 h-6 text-primary" />
+              </div>
+              <span className="text-xl font-bold text-foreground">30</span>
+              <span className="text-xs text-muted-foreground">Daqiqa</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
+                <CheckCircle className="w-6 h-6 text-primary" />
+              </div>
+              <span className="text-xl font-bold text-foreground">80%</span>
+              <span className="text-xs text-muted-foreground">O'tish</span>
+            </div>
+          </div>
+
+          {/* Start Button */}
+          <Button
+            size="lg"
+            className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-[hsl(var(--cta-green))] hover:bg-[hsl(var(--cta-green-hover))] rounded-xl"
+            onClick={() => setTestStarted(true)}
+          >
+            <Play className="w-5 h-5 mr-2" />
+            Testni boshlash
+          </Button>
+
+          {/* Info text */}
+          <p className="text-xs text-muted-foreground">
+            Testni boshlash uchun ro'yxatdan o'tish shart emas
+          </p>
+        </div>
+      </main>
+    </div>
   );
 }
