@@ -5,7 +5,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { MavzuliTestInterface } from "@/components/MavzuliTestInterface";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { User, LogIn, ChevronDown, ChevronUp, BookOpen, Play, Clock, CheckCircle, HelpCircle, Home, Globe } from "lucide-react";
+import { User, LogIn, ChevronDown, ChevronUp, BookOpen, Play, Clock, CheckCircle, HelpCircle, Home } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const topics = [
@@ -55,9 +55,30 @@ export default function MavzuliTestlar() {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [testStarted, setTestStarted] = useState(false);
   const [showAllTopics, setShowAllTopics] = useState(false);
-  const { user, profile } = useAuth();
+  const { user, profile, isLoading } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate('/auth', { state: { returnTo: '/mavzuli-testlar' } });
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   // On mobile, start test immediately when topic is selected
   const handleTopicSelect = (topicId: string) => {
