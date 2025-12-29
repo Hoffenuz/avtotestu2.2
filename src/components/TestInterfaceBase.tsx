@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Clock, ChevronLeft, ChevronRight, X, Check, Home } from "lucide-react";
 
-interface QuestionData {
+// Format 1: Original format with nested question/answers objects
+interface QuestionDataFormat1 {
   id?: number;
   bilet_id?: number;
   question_id?: number;
@@ -39,6 +40,17 @@ interface QuestionData {
       ru?: string[];
     };
   };
+}
+
+// Format 2: Simple format with choises array (700baza.json / 700baza2.json)
+interface QuestionDataFormat2 {
+  id: number;
+  question: string;
+  choises: Array<{
+    text: string;
+    answer: boolean;
+  }>;
+  image?: string;
 }
 
 interface Question {
@@ -111,36 +123,55 @@ export const TestInterfaceBase = ({
         const jsonData = await response.json();
         
         // Handle different JSON structures
-        let questionsArray: QuestionData[] = [];
+        let rawArray: any[] = [];
         if (jsonData.data && Array.isArray(jsonData.data)) {
-          questionsArray = jsonData.data;
+          rawArray = jsonData.data;
         } else if (Array.isArray(jsonData)) {
-          questionsArray = jsonData;
+          rawArray = jsonData;
         } else if (jsonData.questions && Array.isArray(jsonData.questions)) {
-          questionsArray = jsonData.questions;
+          rawArray = jsonData.questions;
         }
         
-        if (questionsArray.length === 0) {
+        if (rawArray.length === 0) {
           throw new Error(t("test.noQuestionsFound"));
         }
 
         // Randomize if needed and take only required count
         let selectedQuestions = randomize 
-          ? shuffleArray(questionsArray).slice(0, questionCount)
-          : questionsArray.slice(0, questionCount);
+          ? shuffleArray(rawArray).slice(0, questionCount)
+          : rawArray.slice(0, questionCount);
 
         // Transform JSON data to our Question format
+        // Detect format based on presence of "choises" field
         const transformedQuestions: Question[] = selectedQuestions.map((q, idx) => {
+          // Format 2: Simple format with choises array (700baza.json / 700baza2.json)
+          if (q.choises && Array.isArray(q.choises)) {
+            const correctIndex = q.choises.findIndex((c: { answer: boolean }) => c.answer === true);
+            return {
+              id: idx + 1,
+              text: q.question,
+              image: q.image ? `${imagePrefix}${q.image}` : undefined,
+              correctAnswer: correctIndex + 1, // 1-indexed
+              answers: q.choises.map((choice: { text: string }, ansIdx: number) => ({
+                id: ansIdx + 1,
+                text: choice.text,
+              })),
+            };
+          }
+          
+          // Format 1: Original format with nested question/answers objects
+          const typedQ = q as QuestionDataFormat1;
           const answerLang = questionLang as 'oz' | 'uz' | 'ru';
-          const answers = q.answers.answer[answerLang] || q.answers.answer.uz || q.answers.answer.oz || [];
-          const questionText = q.question[answerLang] || q.question.uz || q.question.oz || '';
-          const photoField = q.photo || q.image;
+          const questionObj = typedQ.question;
+          const answers = typedQ.answers?.answer?.[answerLang] || typedQ.answers?.answer?.uz || typedQ.answers?.answer?.oz || [];
+          const questionText = typeof questionObj === 'string' ? questionObj : (questionObj?.[answerLang] || questionObj?.uz || questionObj?.oz || '');
+          const photoField = typedQ.photo || typedQ.image;
           
           return {
             id: idx + 1,
             text: questionText,
             image: photoField ? `${imagePrefix}${photoField}` : undefined,
-            correctAnswer: q.answers.status,
+            correctAnswer: typedQ.answers?.status || 1,
             answers: answers.map((answerText, ansIdx) => ({
               id: ansIdx + 1,
               text: answerText,

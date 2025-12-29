@@ -74,8 +74,9 @@ export default function TestIshlash() {
                 }`}
                 onClick={() => handleLanguageChange(lang.id)}
               >
-                <span className="mr-1">{lang.flag}</span>
-                <span className="hidden sm:inline">{lang.label}</span>
+                {/* Show flags only on desktop */}
+                <span className="hidden sm:inline mr-1">{lang.flag}</span>
+                <span>{lang.label}</span>
               </Button>
             ))}
           </div>
