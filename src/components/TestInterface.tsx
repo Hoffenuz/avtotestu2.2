@@ -76,6 +76,7 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
   const [resultSaved, setResultSaved] = useState(false);
   
   const autoAdvanceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const storageKey = `testState_variant_${variant}`;
 
   // Fetch test data from JSON file
   useEffect(() => {
@@ -96,14 +97,23 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
           throw new Error(t("test.noQuestionsFound"));
         }
 
-        // Transform JSON data to our Question format
+        // Transform JSON data to our Question format (handle media/photo fields)
+        const resolveImage = (obj: any) => {
+          if (obj?.media && obj.media.exist && obj.media.name) {
+            return `/images/${obj.media.name}.png`;
+          }
+          if (obj?.photo) return `/images/${obj.photo}`;
+          if (obj?.image) return `/images/${obj.image}`;
+          return undefined;
+        };
+
         const transformedQuestions: Question[] = variantData.data.map((q, idx) => {
           const answerLang = questionLang as keyof typeof q.answers.answer;
           const answers = q.answers.answer[answerLang] || q.answers.answer.uz;
           return {
             id: idx + 1,
             text: (q.question as any)[questionLang] || q.question.uz,
-            image: q.photo ? `/images/${q.photo}` : undefined,
+            image: resolveImage(q),
             correctAnswer: q.answers.status,
             answers: answers.map((answerText, ansIdx) => ({
               id: ansIdx + 1,
@@ -112,7 +122,28 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
           };
         });
 
-        setQuestions(transformedQuestions);
+        try {
+          const savedRaw = localStorage.getItem(storageKey);
+          if (savedRaw) {
+            const parsed = JSON.parse(savedRaw);
+            if (parsed && parsed.questions && Array.isArray(parsed.questions) && parsed.questions.length === transformedQuestions.length) {
+              setQuestions(parsed.questions);
+              setCurrentQuestion(parsed.currentQuestion || 1);
+              setSelectedAnswers(parsed.selectedAnswers || {});
+              setCorrectAnswers(parsed.correctAnswers || {});
+              setRevealedQuestions(parsed.revealedQuestions || {});
+              setTimeRemaining(parsed.timeRemaining ?? 30 * 60);
+              setShowResults(parsed.showResults || false);
+            } else {
+              setQuestions(transformedQuestions);
+            }
+          } else {
+            setQuestions(transformedQuestions);
+          }
+        } catch (e) {
+          console.warn('Error restoring test state:', e);
+          setQuestions(transformedQuestions);
+        }
       } catch (err: any) {
         console.error('Error fetching test data:', err);
         setError(err.message || t("test.errorLoadingData"));
@@ -148,6 +179,24 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
       }
     };
   }, []);
+
+  // Persist test state to localStorage whenever relevant state changes
+  useEffect(() => {
+    try {
+      const payload = {
+        questions,
+        currentQuestion,
+        selectedAnswers,
+        correctAnswers,
+        revealedQuestions,
+        timeRemaining,
+        showResults
+      };
+      localStorage.setItem(storageKey, JSON.stringify(payload));
+    } catch (e) {
+      // ignore quota errors
+    }
+  }, [questions, currentQuestion, selectedAnswers, correctAnswers, revealedQuestions, timeRemaining, showResults, storageKey]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -205,6 +254,11 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
   const confirmFinishTest = () => {
     setShowFinishDialog(false);
     setShowResults(true);
+    try {
+      localStorage.removeItem(storageKey);
+    } catch (e) {
+      /* ignore */
+    }
   };
 
   const getTestStats = () => {
@@ -357,11 +411,24 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
               {/* Mobile Only: Question Image */}
               {question.image && (
                 <Card className="md:hidden p-3 bg-card border-border mb-4 overflow-hidden">
-                  <img
-                    src={question.image}
-                    alt="Question illustration"
-                    className="w-full max-w-[300px] h-auto mx-auto object-contain rounded"
-                  />
+                  {/\.(png|jpe?g|webp)$/i.test(question.image || "") ? (
+                    <img
+                      src={question.image}
+                      alt="Question illustration"
+                      className="w-full max-w-[300px] h-auto mx-auto object-contain rounded"
+                    />
+                  ) : (
+                    <picture>
+                      <source srcSet={`${question.image}.png`} type="image/png" />
+                      <source srcSet={`${question.image}.jpg`} type="image/jpeg" />
+                      <source srcSet={`${question.image}.jpeg`} type="image/jpeg" />
+                      <img
+                        src={`${question.image}.png`}
+                        alt="Question illustration"
+                        className="w-full max-w-[300px] h-auto mx-auto object-contain rounded"
+                      />
+                    </picture>
+                  )}
                 </Card>
               )}
 
@@ -415,11 +482,24 @@ export const TestInterface = ({ onExit, variant }: TestInterfaceProps) => {
             {question.image && (
               <div className="hidden md:block md:w-[40%] md:flex-shrink-0">
                 <Card className="p-4 bg-card border-border overflow-hidden sticky top-4">
-                  <img
-                    src={question.image}
-                    alt="Question illustration"
-                    className="w-full h-auto object-contain rounded max-h-[60vh]"
-                  />
+                  {/\.(png|jpe?g|webp)$/i.test(question.image || "") ? (
+                    <img
+                      src={question.image}
+                      alt="Question illustration"
+                      className="w-full h-auto object-contain rounded max-h-[60vh]"
+                    />
+                  ) : (
+                    <picture>
+                      <source srcSet={`${question.image}.png`} type="image/png" />
+                      <source srcSet={`${question.image}.jpg`} type="image/jpeg" />
+                      <source srcSet={`${question.image}.jpeg`} type="image/jpeg" />
+                      <img
+                        src={`${question.image}.png`}
+                        alt="Question illustration"
+                        className="w-full h-auto object-contain rounded max-h-[60vh]"
+                      />
+                    </picture>
+                  )}
                 </Card>
               </div>
             )}

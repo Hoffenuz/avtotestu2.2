@@ -18,10 +18,10 @@ import {
 
 const features = [
   { icon: Zap, text: "Barcha mavzularga kirish" },
-  { icon: BookOpen, text: "55+ variant testlar" },
+  { icon: BookOpen, text: "55 variant testlar" },
   { icon: Clock, text: "Cheksiz vaqt" },
-  { icon: Shield, text: "Batafsil izohlar" },
-  { icon: Award, text: "Sertifikat olish" },
+  { icon: Shield, text: "Darslik guruhi" },
+  { icon: Award, text: "Premium guruhga qo'shilish" },
   { icon: Star, text: "Prioritet qo'llab-quvvatlash" },
 ];
 
@@ -34,7 +34,7 @@ const plans = [
     features: [
       "Barcha 55+ variant",
       "Barcha mavzular",
-      "Reklama yo'q",
+      "Darslik guruhi",
       "7 kun muddatga",
     ],
     highlighted: false,

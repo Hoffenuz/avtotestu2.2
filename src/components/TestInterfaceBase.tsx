@@ -106,6 +106,7 @@ export const TestInterfaceBase = ({
   const [testStartTime] = useState(Date.now());
   
   const autoAdvanceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const storageKey = `testState:${dataSource}`;
 
   // Fetch test data from JSON file
   useEffect(() => {
@@ -141,16 +142,25 @@ export const TestInterfaceBase = ({
           ? shuffleArray(rawArray).slice(0, questionCount)
           : rawArray.slice(0, questionCount);
 
-        // Transform JSON data to our Question format
-        // Detect format based on presence of "choises" field
+        // Transform JSON data to our Question format and handle media fields
         const transformedQuestions: Question[] = selectedQuestions.map((q, idx) => {
+          // Helper to resolve image path from different formats (media, image, photo)
+          const resolveImage = (obj: any) => {
+            if (obj?.media && obj.media.exist && obj.media.name) {
+              return `/images/${obj.media.name}.png`;
+            }
+            if (obj?.image) return `${imagePrefix}${obj.image}`;
+            if (obj?.photo) return `${imagePrefix}${obj.photo}`;
+            return undefined;
+          };
+
           // Format 2: Simple format with choises array (700baza.json / 700baza2.json)
           if (q.choises && Array.isArray(q.choises)) {
             const correctIndex = q.choises.findIndex((c: { answer: boolean }) => c.answer === true);
             return {
               id: idx + 1,
               text: q.question,
-              image: q.image ? `${imagePrefix}${q.image}` : undefined,
+              image: resolveImage(q),
               correctAnswer: correctIndex + 1, // 1-indexed
               answers: q.choises.map((choice: { text: string }, ansIdx: number) => ({
                 id: ansIdx + 1,
@@ -165,12 +175,12 @@ export const TestInterfaceBase = ({
           const questionObj = typedQ.question;
           const answers = typedQ.answers?.answer?.[answerLang] || typedQ.answers?.answer?.uz || typedQ.answers?.answer?.oz || [];
           const questionText = typeof questionObj === 'string' ? questionObj : (questionObj?.[answerLang] || questionObj?.uz || questionObj?.oz || '');
-          const photoField = typedQ.photo || typedQ.image;
+          const imagePath = resolveImage(typedQ);
           
           return {
             id: idx + 1,
             text: questionText,
-            image: photoField ? `${imagePrefix}${photoField}` : undefined,
+            image: imagePath,
             correctAnswer: typedQ.answers?.status || 1,
             answers: answers.map((answerText, ansIdx) => ({
               id: ansIdx + 1,
@@ -179,7 +189,29 @@ export const TestInterfaceBase = ({
           };
         });
 
-        setQuestions(transformedQuestions);
+        // Restore saved state if available and matches the same question set
+        try {
+          const savedRaw = localStorage.getItem(storageKey);
+          if (savedRaw) {
+            const parsed = JSON.parse(savedRaw);
+            if (parsed && parsed.questions && Array.isArray(parsed.questions) && parsed.questions.length === transformedQuestions.length) {
+              setQuestions(parsed.questions);
+              setCurrentQuestion(parsed.currentQuestion || 1);
+              setSelectedAnswers(parsed.selectedAnswers || {});
+              setCorrectAnswers(parsed.correctAnswers || {});
+              setRevealedQuestions(parsed.revealedQuestions || {});
+              setTimeRemaining(parsed.timeRemaining ?? timeLimit);
+              setShowResults(parsed.showResults || false);
+            } else {
+              setQuestions(transformedQuestions);
+            }
+          } else {
+            setQuestions(transformedQuestions);
+          }
+        } catch (e) {
+          console.warn('Error restoring test state:', e);
+          setQuestions(transformedQuestions);
+        }
       } catch (err: any) {
         console.error('Error fetching test data:', err);
         setError(err.message || t("test.errorLoadingData"));
@@ -215,6 +247,24 @@ export const TestInterfaceBase = ({
       }
     };
   }, []);
+
+  // Persist test state to localStorage whenever relevant state changes
+  useEffect(() => {
+    try {
+      const payload = {
+        questions,
+        currentQuestion,
+        selectedAnswers,
+        correctAnswers,
+        revealedQuestions,
+        timeRemaining,
+        showResults
+      };
+      localStorage.setItem(storageKey, JSON.stringify(payload));
+    } catch (e) {
+      // ignore quota errors
+    }
+  }, [questions, currentQuestion, selectedAnswers, correctAnswers, revealedQuestions, timeRemaining, showResults, storageKey]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -272,6 +322,11 @@ export const TestInterfaceBase = ({
   const confirmFinishTest = () => {
     setShowFinishDialog(false);
     setShowResults(true);
+    try {
+      localStorage.removeItem(storageKey);
+    } catch (e) {
+      /* ignore */ 
+    }
   };
 
   const getTestStats = () => {
@@ -422,11 +477,24 @@ export const TestInterfaceBase = ({
               {/* Mobile Only: Question Image */}
               {question.image && (
                 <Card className="md:hidden p-3 bg-card border-border mb-4 overflow-hidden">
-                  <img
-                    src={question.image}
-                    alt="Question illustration"
-                    className="w-full max-w-[300px] h-auto mx-auto object-contain rounded"
-                  />
+                  {/\.(png|jpe?g|webp)$/i.test(question.image || "") ? (
+                    <img
+                      src={question.image}
+                      alt="Question illustration"
+                      className="w-full max-w-[300px] h-auto mx-auto object-contain rounded"
+                    />
+                  ) : (
+                    <picture>
+                      <source srcSet={`${question.image}.png`} type="image/png" />
+                      <source srcSet={`${question.image}.jpg`} type="image/jpeg" />
+                      <source srcSet={`${question.image}.jpeg`} type="image/jpeg" />
+                      <img
+                        src={`${question.image}.png`}
+                        alt="Question illustration"
+                        className="w-full max-w-[300px] h-auto mx-auto object-contain rounded"
+                      />
+                    </picture>
+                  )}
                 </Card>
               )}
 
@@ -480,11 +548,24 @@ export const TestInterfaceBase = ({
             {question.image && (
               <div className="hidden md:block md:w-[40%] md:flex-shrink-0">
                 <Card className="p-4 bg-card border-border overflow-hidden sticky top-4">
-                  <img
-                    src={question.image}
-                    alt="Question illustration"
-                    className="w-full h-auto object-contain rounded max-h-[60vh]"
-                  />
+                  {/\.(png|jpe?g|webp)$/i.test(question.image || "") ? (
+                    <img
+                      src={question.image}
+                      alt="Question illustration"
+                      className="w-full h-auto object-contain rounded max-h-[60vh]"
+                    />
+                  ) : (
+                    <picture>
+                      <source srcSet={`${question.image}.png`} type="image/png" />
+                      <source srcSet={`${question.image}.jpg`} type="image/jpeg" />
+                      <source srcSet={`${question.image}.jpeg`} type="image/jpeg" />
+                      <img
+                        src={`${question.image}.png`}
+                        alt="Question illustration"
+                        className="w-full h-auto object-contain rounded max-h-[60vh]"
+                      />
+                    </picture>
+                  )}
                 </Card>
               </div>
             )}
