@@ -1,0 +1,15 @@
+# AvtoTest - Haydovchilik imtihoniga tayyorlanish
+# https://quiz-flow-refresh.lovable.app
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://quiz-flow-refresh.lovable.app/sitemap.xml
+
+# Crawl-delay (optional, helps with server load)
+Crawl-delay: 1
+
+# Disallow auth pages (not useful for search)
+Disallow: /auth
+Disallow: /profile
