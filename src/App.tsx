@@ -17,6 +17,7 @@ import TestIshlash from "./pages/TestIshlash";
 import Pro from "./pages/Pro";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import AdminChat from "./pages/AdminChat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
                 <Route path="/pro" element={<Pro />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/admin/chat" element={<AdminChat />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </TooltipProvider>

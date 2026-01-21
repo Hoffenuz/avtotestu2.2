@@ -4,6 +4,7 @@ import { Menu, X, Car, MapPin, User, LogIn, Crown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SupportChat } from "@/components/support/SupportChat";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -189,6 +190,9 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main Content */}
       <main className="flex-1">{children}</main>
+
+      {/* Support Chat Widget */}
+      <SupportChat />
 
       {/* Footer */}
       <footer className="bg-primary text-primary-foreground py-12">
